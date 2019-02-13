@@ -1,0 +1,60 @@
+syntax = "proto2";
+
+package jetplex.client;
+
+option java_package = "org.unclesniper.jetplex";
+option java_outer_classname = "ClientProto";
+
+message Packet {
+
+	message Exec {
+		repeated string argv = 1;
+		required uint32 flags = 2;
+		repeated string environ = 3;
+		optional string work_dir = 4;
+	}
+
+	message Connect {
+		required fixed32 host = 1;
+		required uint32 port = 2;
+	}
+
+	message Disconnect {
+		required uint32 socket = 1;
+	}
+
+	message Listen {
+		required fixed32 bind = 1;
+		required uint32 port = 2;
+	}
+
+	message Send {
+		required string path = 1;
+		required uint32 flags = 2;
+	}
+
+	message Recv {
+		required string path = 1;
+	}
+
+	message Write {
+		required uint32 stream = 1;
+		required bytes data = 2;
+	}
+
+	message Close {
+		required uint32 stream = 1;
+	}
+
+	oneof packet {
+		Exec exec = 1;
+		Connect connect = 2;
+		Disconnect disconnect = 3;
+		Listen listen = 4;
+		Send send = 5;
+		Recv recv = 6;
+		Write write = 7;
+		Close close = 8;
+	}
+
+}

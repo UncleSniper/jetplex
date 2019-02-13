@@ -1,0 +1,87 @@
+syntax = "proto2";
+
+package jetplex.server;
+
+option java_package = "org.unclesniper.jetplex";
+option java_outer_classname = "ServerProto";
+
+message Packet {
+
+	message Failed {
+		required string exception_type = 1;
+		required string error_message = 2;
+	}
+
+	message Exec {
+		required uint32 process = 1;
+		optional uint32 in_stream = 2;
+		optional uint32 out_stream = 3;
+		optional uint32 err_stream = 4;
+	}
+
+	message Connect {
+		required uint32 socket = 1;
+		required uint32 in_stream = 2;
+		required uint32 out_stream = 3;
+	}
+
+	message Disconnect {}
+
+	message Listen {
+		required uint32 socket = 1;
+	}
+
+	message Send {
+		required uint32 stream = 1;
+	}
+
+	message Recv {
+		required uint32 stream = 1;
+	}
+
+	message Write {}
+
+	message Close {}
+
+	message Read {
+		required uint32 stream = 1;
+		required bytes data = 2;
+	}
+
+	message Exit {
+		required uint32 process = 1;
+		required int32 status = 2;
+	}
+
+	message Accept {
+		required uint32 listen_socket = 1;
+		required uint32 client_socket = 2;
+		required uint32 in_stream = 3;
+		required uint32 out_stream = 4;
+	}
+
+	oneof packet {
+		Exec exec_ok = 1;
+		Failed exec_failed = 2;
+		Connect connect_ok = 3;
+		Failed connect_failed = 4;
+		Disconnect disconnect_ok = 5;
+		Failed disconnect_failed = 6;
+		Listen listen_ok = 7;
+		Failed listen_failed = 8;
+		Send send_ok = 9;
+		Failed send_failed = 10;
+		Recv recv_ok = 11;
+		Failed recv_failed = 12;
+		Write write_ok = 13;
+		Failed write_failed = 14;
+		Close close_ok = 15;
+		Failed close_failed = 16;
+		Read read_data = 17;
+		Failed read_failed = 18;
+		Exit exit = 19;
+		Accept accept_client = 20;
+		Failed accept_failed = 21;
+	}
+
+}

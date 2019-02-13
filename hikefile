@@ -1,0 +1,98 @@
+projectName "jetplex"
+
+set version "0.1"
+include ifExists "version.hikefile"
+
+artifact directory "src" "src"
+artifact directory "bin" { "bin" mkdir }
+artifact directory "top" "."
+
+artifact tree "libs" {
+	"lib"
+	name "libs"
+	files
+	wildcard "*.jar"
+}
+
+artifact artifacts "classpath" {
+	name "build classpath"
+	"bin"
+	"libs"
+}
+
+artifact pipeline {
+	key "classes"
+	scandir {
+		"src"
+		files
+		wildcard "*.java"
+		not wildcard "package-info.java"
+	}
+	regex {
+		"\\.java$" ".class"
+		rebaseFrom "src"
+		rebaseTo "bin"
+		exec "compile" {
+			"javac"
+				"-cp" aux "classpath" merge
+				"-d" aux "bin"
+				"-sourcepath" aux "src"
+				"-Xlint:unchecked"
+				source
+			loud
+		}
+	}
+}
+
+artifact split "genClasses" {
+	"classes"
+	tree "actualClasses" {
+		"bin"
+		files
+		wildcard "*.class"
+	}
+}
+
+artifact file "jar" {
+	"dist/org.unclesniper.jetplex-${version}.jar"
+	zip {
+		piece {
+			from "bin"
+			"genClasses"
+		}
+	}
+}
+
+artifact artifacts "protobuf" {
+	name "protobuf sources"
+	file "serverProtoGen" {
+		"src/org/unclesniper/jetplex/ServerProto.java"
+		exec "protoc" {
+			"protoc" "-I" aux "top" "--java_out" aux "src" source
+			loud
+			file "serverProtoSrc" "server.proto"
+		}
+	}
+	file "clientProtoGen" {
+		"src/org/unclesniper/jetplex/ClientProto.java"
+		exec "protoc" {
+			"protoc" "-I" aux "top" "--java_out" aux "src" source
+			loud
+			file "clientProtoSrc" "client.proto"
+		}
+	}
+}
+
+goal build require "jar"
+
+goal clean {
+	delete "bin"
+	delete "dist"
+}
+
+goal protobuf require "protobuf"
+
+goal distclean {
+	attain clean
+	delete artifact "protobuf"
+}
